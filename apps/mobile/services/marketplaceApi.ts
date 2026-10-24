@@ -22,7 +22,7 @@
 import { useAuthStore } from '@/hooks/useAuth';
 import type { KeyEnvelope } from './resaleCrypto';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 const REQUEST_TIMEOUT_MS = 15_000;
 
 export class MarketplaceApiError extends Error {
@@ -244,19 +244,16 @@ export function uploadKeyEnvelope(
   envelope: KeyEnvelope,
   saleTxHash?: string | null
 ): Promise<StoredKeyEnvelope> {
-  return request<StoredKeyEnvelope>(
-    `/listings/${encodeURIComponent(paymentId)}/key-envelope`,
-    {
-      method: 'POST',
-      body: {
-        buyer_wallet: buyerWallet,
-        ephemeral_public_key: envelope.ephemeralPublicKey,
-        nonce: envelope.nonce,
-        ciphertext: envelope.ciphertext,
-        sale_tx_hash: saleTxHash ?? null,
-      },
-    }
-  );
+  return request<StoredKeyEnvelope>(`/listings/${encodeURIComponent(paymentId)}/key-envelope`, {
+    method: 'POST',
+    body: {
+      buyer_wallet: buyerWallet,
+      ephemeral_public_key: envelope.ephemeralPublicKey,
+      nonce: envelope.nonce,
+      ciphertext: envelope.ciphertext,
+      sale_tx_hash: saleTxHash ?? null,
+    },
+  });
 }
 
 /**
@@ -266,9 +263,7 @@ export function uploadKeyEnvelope(
  * polling right after settlement will legitimately see a 404 until the seller
  * uploads.
  */
-export async function fetchKeyEnvelope(
-  paymentId: string
-): Promise<StoredKeyEnvelope | null> {
+export async function fetchKeyEnvelope(paymentId: string): Promise<StoredKeyEnvelope | null> {
   try {
     return await request<StoredKeyEnvelope>(
       `/listings/${encodeURIComponent(paymentId)}/key-envelope`

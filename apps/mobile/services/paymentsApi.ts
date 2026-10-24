@@ -10,7 +10,7 @@
 
 import { useAuthStore } from '@/hooks/useAuth';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const RECORD_PAYMENT_TIMEOUT_MS = 15_000;
 const RECORD_PAYMENT_MAX_RETRIES = 2;
@@ -84,7 +84,8 @@ export async function recordTicketPurchase(
     } catch (error) {
       lastError = error;
       const isLastAttempt = attempt === RECORD_PAYMENT_MAX_RETRIES;
-      const isRetryable = error instanceof RecordPaymentError ? isRetryableStatus(error.status) : true;
+      const isRetryable =
+        error instanceof RecordPaymentError ? isRetryableStatus(error.status) : true;
       if (isLastAttempt || !isRetryable) {
         throw error;
       }
@@ -93,7 +94,9 @@ export async function recordTicketPurchase(
   }
 
   // Unreachable, but keeps TypeScript happy about the return type.
-  throw lastError instanceof Error ? lastError : new RecordPaymentError('Failed to record payment.');
+  throw lastError instanceof Error
+    ? lastError
+    : new RecordPaymentError('Failed to record payment.');
 }
 
 function isRetryableStatus(status: number | null): boolean {
@@ -109,7 +112,7 @@ export async function getTicket(id: string): Promise<TicketDetails> {
     const token = useAuthStore.getState().token;
     const response = await fetch(`${API_BASE_URL}/api/v1/profile/tickets`, {
       headers: {
-        ...(token ? { Authorization: `****** } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       signal: controller.signal,
     });
@@ -201,7 +204,9 @@ async function postTicketPayment(
   } catch (error) {
     if (error instanceof RecordPaymentError) throw error;
     if ((error as any)?.name === 'AbortError') {
-      throw new RecordPaymentError('Timed out recording your ticket purchase. Your payment was still successful on-chain.');
+      throw new RecordPaymentError(
+        'Timed out recording your ticket purchase. Your payment was still successful on-chain.'
+      );
     }
     throw new RecordPaymentError(
       error instanceof Error ? error.message : 'Failed to record ticket purchase.'

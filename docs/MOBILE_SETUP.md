@@ -21,10 +21,10 @@ Create a `.env` file in `apps/mobile` with your backend API URL:
 
 ```bash
 cd apps/mobile
-echo "EXPO_PUBLIC_API_URL=http://localhost:8080" > .env
+echo "EXPO_PUBLIC_API_URL=http://localhost:3001" > .env
 ```
 
-The mobile app defaults to `http://localhost:8080` if no environment variable is set. Point this to your local server (e.g., `http://10.0.2.2:3001` for Android emulator, `http://localhost:3001` for iOS simulator).
+The mobile app defaults to `http://localhost:3001` if no environment variable is set. Point this to your local server (e.g., `http://10.0.2.2:3001` for Android emulator, `http://localhost:3001` for iOS simulator).
 
 ## Start the App
 
@@ -60,6 +60,7 @@ pnpm typecheck   # Run TypeScript type checking
 ## Common Errors and Fixes
 
 ### Metro cache issues
+
 If you see strange bundling behavior or errors about modules not found:
 
 ```bash
@@ -69,6 +70,7 @@ npx expo start --clear
 ```
 
 ### Port already in use
+
 If port `19000` or `19001` is already in use:
 
 ```bash
@@ -76,6 +78,7 @@ pnpm start -- --port 19002
 ```
 
 ### Metro doesn't find the app
+
 If Metro can't find the entry point:
 
 ```bash

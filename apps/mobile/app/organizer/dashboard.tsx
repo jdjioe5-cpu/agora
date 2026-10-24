@@ -54,7 +54,7 @@ export default function OrganizerDashboard() {
 
   const fetchEventData = useCallback(async () => {
     if (!selectedEventId) return;
-    
+
     try {
       setLoading(true);
       const [gates, staff] = await Promise.all([
@@ -80,7 +80,7 @@ export default function OrganizerDashboard() {
   useEffect(() => {
     if (!selectedEventId || !user?.walletAddress) return;
 
-    const wsUrl = `${process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8080'}/api/v1/ws/organizer?token=${user.authToken}`;
+    const wsUrl = `${process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:3001'}/api/v1/ws/organizer?token=${user.authToken}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -91,7 +91,7 @@ export default function OrganizerDashboard() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
+
         if (data.type === 'ScanVelocity') {
           setScanVelocityData((prev) => {
             const newData = [...prev, data.data];
@@ -101,9 +101,7 @@ export default function OrganizerDashboard() {
           setGateMetrics(data.data.gates);
         } else if (data.type === 'StaffAuth') {
           setStaffAuthorizations((prev) => {
-            const existing = prev.findIndex(
-              (s) => s.staff_wallet === data.data.staff_wallet
-            );
+            const existing = prev.findIndex((s) => s.staff_wallet === data.data.staff_wallet);
             if (existing >= 0) {
               const updated = [...prev];
               updated[existing] = data.data;
@@ -212,23 +210,16 @@ export default function OrganizerDashboard() {
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Organizer Dashboard</Text>
           <View style={styles.connectionStatus}>
             <View
-              style={[
-                styles.statusDot,
-                { backgroundColor: wsConnected ? '#34C759' : '#FF3B30' },
-              ]}
+              style={[styles.statusDot, { backgroundColor: wsConnected ? '#34C759' : '#FF3B30' }]}
             />
-            <Text style={styles.statusText}>
-              {wsConnected ? 'Live' : 'Disconnected'}
-            </Text>
+            <Text style={styles.statusText}>{wsConnected ? 'Live' : 'Disconnected'}</Text>
           </View>
         </View>
 

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 export interface GateMetrics {
   gate_id: string;
@@ -162,7 +162,9 @@ class OrganizerApiService {
   }
 
   // Send broadcast alert to checked-in attendees
-  async sendBroadcastAlert(alert: BroadcastAlert): Promise<{ success: boolean; message?: string; error?: string }> {
+  async sendBroadcastAlert(
+    alert: BroadcastAlert
+  ): Promise<{ success: boolean; message?: string; error?: string }> {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${API_BASE}/organizer/broadcast`, {
       method: 'POST',
@@ -237,7 +239,10 @@ class OrganizerApiService {
   }
 
   // Revoke staff authorization
-  async revokeStaffAuthorization(eventId: string, staffWallet: string): Promise<{ success: boolean }> {
+  async revokeStaffAuthorization(
+    eventId: string,
+    staffWallet: string
+  ): Promise<{ success: boolean }> {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${API_BASE}/organizer/${eventId}/staff/revoke`, {
       method: 'POST',

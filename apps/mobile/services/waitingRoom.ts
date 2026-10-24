@@ -16,7 +16,7 @@
 
 import { sha256Hex } from '@/utils/sha256';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const REQUEST_TIMEOUT_MS = 15_000;
 
@@ -82,7 +82,10 @@ async function postJson<T>(path: string, payload: unknown): Promise<T> {
     });
     const body = await parseJson(response);
     if (!response.ok) {
-      throw new WaitingRoomError(extractMessage(body, response.status, `Request failed (${response.status}).`), response.status);
+      throw new WaitingRoomError(
+        extractMessage(body, response.status, `Request failed (${response.status}).`),
+        response.status
+      );
     }
     // Our server wraps successful payloads in `{ success, data, message }`.
     return (body?.data ?? body) as T;
@@ -105,7 +108,10 @@ async function getJson<T>(path: string): Promise<T> {
     });
     const body = await parseJson(response);
     if (!response.ok) {
-      throw new WaitingRoomError(extractMessage(body, response.status, `Request failed (${response.status}).`), response.status);
+      throw new WaitingRoomError(
+        extractMessage(body, response.status, `Request failed (${response.status}).`),
+        response.status
+      );
     }
     return (body?.data ?? body) as T;
   } catch (error) {
@@ -138,12 +144,17 @@ export function solvePow(challenge: string, difficulty: number, maxAttempts = 2_
 }
 
 /** Verify the client is in the queue / holds a grant. */
-export async function joinWaitingRoom(payload: JoinWaitingRoomRequest): Promise<QueueStatusPayload> {
+export async function joinWaitingRoom(
+  payload: JoinWaitingRoomRequest
+): Promise<QueueStatusPayload> {
   return postJson<QueueStatusPayload>('/api/v1/waiting-room/join', payload);
 }
 
 /** Current queue status for a client. Throws 404 when not in the queue. */
-export async function getWaitingRoomStatus(eventId: string, clientId: string): Promise<QueueStatusPayload> {
+export async function getWaitingRoomStatus(
+  eventId: string,
+  clientId: string
+): Promise<QueueStatusPayload> {
   const query = `event_id=${encodeURIComponent(eventId)}&client_id=${encodeURIComponent(clientId)}`;
   return getJson<QueueStatusPayload>(`/api/v1/waiting-room/status?${query}`);
 }

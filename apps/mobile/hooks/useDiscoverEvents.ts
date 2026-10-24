@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import mockEvents from "../constants/mockEvents.json";
-import {
-  filterEvents,
-  type DiscoverEvent,
-  type DiscoverFilters,
-} from "../lib/discoverFilters";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import mockEvents from '../constants/mockEvents.json';
+import { filterEvents, type DiscoverEvent, type DiscoverFilters } from '../lib/discoverFilters';
 
 /**
  * Fetches the discover feed with caching and an offline fallback (issue #1004).
@@ -37,8 +33,7 @@ export interface UseDiscoverEventsResult {
   refetch: () => Promise<void>;
 }
 
-const API_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8080";
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 async function fetchDiscoverEvents(signal: AbortSignal): Promise<DiscoverEvent[]> {
   const res = await fetch(`${API_URL}/api/events/discover`, { signal });
@@ -57,8 +52,8 @@ export function useDiscoverEvents(filters: DiscoverFilters = {}) {
   const [error, setError] = useState<string | null>(null);
 
   // Debounce search query to avoid API requests on every character
-  const [debouncedQuery, setDebouncedQuery] = useState(filters.query ?? "");
-  const queryRef = useRef(filters.query ?? "");
+  const [debouncedQuery, setDebouncedQuery] = useState(filters.query ?? '');
+  const queryRef = useRef(filters.query ?? '');
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Guards against setting state after unmount, which React warns about and
@@ -99,7 +94,7 @@ export function useDiscoverEvents(filters: DiscoverFilters = {}) {
         setEvents(mockEvents as DiscoverEvent[]);
       }
       setOffline(true);
-      setError(err instanceof Error ? err.message : "Could not reach the server");
+      setError(err instanceof Error ? err.message : 'Could not reach the server');
     } finally {
       clearTimeout(timeout);
       if (mounted.current) {
@@ -117,7 +112,7 @@ export function useDiscoverEvents(filters: DiscoverFilters = {}) {
         clearTimeout(debounceTimerRef.current);
       }
       debounceTimerRef.current = setTimeout(() => {
-        setDebouncedQuery(filters.query ?? "");
+        setDebouncedQuery(filters.query ?? '');
       }, SEARCH_DEBOUNCE_MS);
     }
   }, [filters.query]);

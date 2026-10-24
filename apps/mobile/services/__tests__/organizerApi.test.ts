@@ -1,6 +1,16 @@
 import { organizerApi } from '../organizerApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+  },
+}));
+
 /**
  * Issue #1179 — organizer service API tests.
  *
@@ -89,7 +99,9 @@ describe('generateDelegationQR', () => {
 
   it('throws an error with a useful message when the request fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue('token');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(500, { error: 'Internal server error' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(500, { error: 'Internal server error' })
+    );
 
     await expect(
       organizerApi.generateDelegationQR(baseEventId, baseGateId, baseStaffWallet)
@@ -122,7 +134,9 @@ describe('verifyDelegationQR', () => {
 
   it('throws an error when verification fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue('token');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(401, { error: 'Invalid QR code' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(401, { error: 'Invalid QR code' })
+    );
 
     await expect(organizerApi.verifyDelegationQR('invalid-code')).rejects.toThrow(
       'Failed to verify delegation QR code'
@@ -218,7 +232,9 @@ describe('sendBroadcastAlert', () => {
 
   it('throws an error when broadcast fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue('token');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(403, { error: 'Not authorized' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(403, { error: 'Not authorized' })
+    );
 
     await expect(organizerApi.sendBroadcastAlert(baseAlert)).rejects.toThrow(
       'Failed to send broadcast alert'
@@ -247,7 +263,7 @@ describe('getEventGates', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/events/${baseEventId}/gates`);
+    expect(url).toBe(`http://localhost:3001/api/v1/events/${baseEventId}/gates`);
     expect(init.method).toBe('GET');
     expect(init.headers.Authorization).toBe(`Bearer ${mockToken}`);
     expect(result).toEqual(mockResponse);
@@ -263,7 +279,7 @@ describe('getEventGates', () => {
     await organizerApi.getEventGates(baseEventId);
 
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toMatch(/^http:\/\/localhost:8080\/api\/v1/);
+    expect(url).toMatch(/^http:\/\/localhost:3001\/api\/v1/);
 
     // Restore
     process.env.EXPO_PUBLIC_API_URL = originalEnv;
@@ -271,9 +287,13 @@ describe('getEventGates', () => {
 
   it('throws an error when the request fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue('token');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(500, { error: 'DB unavailable' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(500, { error: 'DB unavailable' })
+    );
 
-    await expect(organizerApi.getEventGates(baseEventId)).rejects.toThrow('Failed to fetch event gates');
+    await expect(organizerApi.getEventGates(baseEventId)).rejects.toThrow(
+      'Failed to fetch event gates'
+    );
   });
 });
 
@@ -297,13 +317,15 @@ describe('getStaffAuthorizations', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/organizer/${baseEventId}/staff`);
+    expect(url).toBe(`http://localhost:3001/api/v1/organizer/${baseEventId}/staff`);
     expect(result).toEqual(mockResponse);
   });
 
   it('throws an error when fetching staff authorizations fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue('token');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(404, { error: 'Event not found' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(404, { error: 'Event not found' })
+    );
 
     await expect(organizerApi.getStaffAuthorizations(baseEventId)).rejects.toThrow(
       'Failed to fetch staff authorizations'
@@ -340,7 +362,7 @@ describe('scanTicket', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/tickets/${baseTicketId}/scan`);
+    expect(url).toBe(`http://localhost:3001/api/v1/tickets/${baseTicketId}/scan`);
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body)).toMatchObject(baseScanRequest);
     expect(init.headers.Authorization).toBe(`Bearer ${mockToken}`);
@@ -416,14 +438,16 @@ describe('revokeStaffAuthorization', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/organizer/${baseEventId}/staff/revoke`);
+    expect(url).toBe(`http://localhost:3001/api/v1/organizer/${baseEventId}/staff/revoke`);
     expect(JSON.parse(init.body)).toMatchObject({ staff_wallet: baseStaffWallet });
     expect(result).toEqual(mockResponse);
   });
 
   it('throws an error when revocation fails', async () => {
     jest.spyOn(AsyncStorage, 'getItem').mockResolvedValue('token');
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(403, { error: 'Not authorized' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(403, { error: 'Not authorized' })
+    );
 
     await expect(
       organizerApi.revokeStaffAuthorization(baseEventId, baseStaffWallet)

@@ -63,7 +63,7 @@ This installs the JavaScript dependencies used by the frontend workspace.
 
 ## 3. Prepare Environment Files
 
-> **Configuration Note**: *For a comprehensive list of all backend environment variables, their defaults, required statuses, and security classifications, please refer to the [Server Configuration Reference](./server/README.md#Configuration)*.
+> **Configuration Note**: _For a comprehensive list of all backend environment variables, their defaults, required statuses, and security classifications, please refer to the [Server Configuration Reference](./server/README.md#Configuration)_.
 
 Before starting services, review these env files:
 
@@ -117,13 +117,13 @@ docker compose up --build
 
 This starts the full stack with these defaults:
 
-| Service | Container Name | Port | Environment |
-|---------|---------------|------|-------------|
-| PostgreSQL | `agora_postgres` | `5432` | `POSTGRES_USER=user`, `POSTGRES_PASSWORD=password`, `POSTGRES_DB=agora` |
-| Redis | `agora_redis` | `6379` | AOF persistence enabled |
-| Stellar RPC | `agora_stellar_rpc` | `8000` | Test network passphrase |
-| Backend (Rust) | `agora_backend` | `3001` | Connects to postgres + redis + stellar-rpc |
-| Frontend (Next.js) | `agora_frontend` | `3000` | `NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1` |
+| Service            | Container Name      | Port   | Environment                                                             |
+| ------------------ | ------------------- | ------ | ----------------------------------------------------------------------- |
+| PostgreSQL         | `agora_postgres`    | `5432` | `POSTGRES_USER=user`, `POSTGRES_PASSWORD=password`, `POSTGRES_DB=agora` |
+| Redis              | `agora_redis`       | `6379` | AOF persistence enabled                                                 |
+| Stellar RPC        | `agora_stellar_rpc` | `8000` | Test network passphrase                                                 |
+| Backend (Rust)     | `agora_backend`     | `3001` | Connects to postgres + redis + stellar-rpc                              |
+| Frontend (Next.js) | `agora_frontend`    | `3000` | `NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1`                      |
 
 Container names and ports can be customized with environment variables (see `make help`).
 
@@ -346,15 +346,15 @@ This installs the hooks into `.git/hooks/pre-commit`.
 
 ### What runs on each commit
 
-| Hook | What it checks |
-|------|---------------|
-| `trailing-whitespace` | Removes trailing whitespace |
-| `end-of-file-fixer` | Ensures files end with a newline |
-| `check-merge-conflict` | Catches leftover merge conflict markers |
-| `rustfmt` | Formats Rust code (`cargo fmt --check`) |
-| `clippy` | Lints Rust code (`cargo clippy -D warnings`) |
-| `prettier` | Formats JS/TS/CSS/JSON/MD files |
-| `eslint` | Lints JS/TS files in `apps/web` |
+| Hook                   | What it checks                               |
+| ---------------------- | -------------------------------------------- |
+| `trailing-whitespace`  | Removes trailing whitespace                  |
+| `end-of-file-fixer`    | Ensures files end with a newline             |
+| `check-merge-conflict` | Catches leftover merge conflict markers      |
+| `rustfmt`              | Formats Rust code (`cargo fmt --check`)      |
+| `clippy`               | Lints Rust code (`cargo clippy -D warnings`) |
+| `prettier`             | Formats JS/TS/CSS/JSON/MD files              |
+| `eslint`               | Lints JS/TS files in `apps/web`              |
 
 ### Run hooks manually
 
@@ -385,7 +385,6 @@ git commit --no-verify -m "message"
 
 Only skip when you have a specific reason; CI will still run all checks.
 
-
 ## Mobile App (Expo)
 
 The mobile app lives in `apps/mobile` and is built with Expo (React Native).
@@ -410,16 +409,16 @@ The mobile app reads `EXPO_PUBLIC_API_URL` to reach the backend. Create a `.env`
 
 ```bash
 # apps/mobile/.env
-EXPO_PUBLIC_API_URL=http://localhost:8080
+EXPO_PUBLIC_API_URL=http://localhost:3001
 ```
 
 Adjust the value depending on how you run the app:
 
-| Target | URL |
-|--------|-----|
-| iOS Simulator | `http://localhost:3001` |
-| Android Emulator | `http://10.0.2.2:3001` (`10.0.2.2` is the host loopback alias inside the Android emulator) |
-| Physical device (Expo Go) | `http://<your-local-IP>:3001` — phone and computer must be on the same Wi-Fi network |
+| Target                    | URL                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| iOS Simulator             | `http://localhost:3001`                                                                    |
+| Android Emulator          | `http://10.0.2.2:3001` (`10.0.2.2` is the host loopback alias inside the Android emulator) |
+| Physical device (Expo Go) | `http://<your-local-IP>:3001` — phone and computer must be on the same Wi-Fi network       |
 
 ### Start the app
 

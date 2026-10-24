@@ -27,7 +27,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import { locationService, VenueGeofence } from '@/services/locationService';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,12 +40,7 @@ export interface TicketWithVenue {
   venueLng: number;
 }
 
-export type GeofenceStatus =
-  | 'idle'
-  | 'initialising'
-  | 'active'
-  | 'permission-denied'
-  | 'error';
+export type GeofenceStatus = 'idle' | 'initialising' | 'active' | 'permission-denied' | 'error';
 
 export interface UseGeofenceOptions {
   tickets: TicketWithVenue[];
@@ -105,7 +100,7 @@ async function registerGeofenceOnServer(
   pushToken: string,
   venueLat: number,
   venueLng: number,
-  authToken: string,
+  authToken: string
 ): Promise<void> {
   const controller = new AbortController();
   const tid = setTimeout(() => controller.abort(), 15_000);
@@ -136,10 +131,7 @@ async function registerGeofenceOnServer(
 // Local notification helper
 // ---------------------------------------------------------------------------
 
-async function scheduleProximityNotification(
-  eventId: string,
-  eventTitle: string,
-): Promise<void> {
+async function scheduleProximityNotification(eventId: string, eventTitle: string): Promise<void> {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "You're near the venue! 🎟️",
@@ -165,9 +157,7 @@ export function useGeofence({
   radiusMeters = DEFAULT_RADIUS_M,
 }: UseGeofenceOptions): UseGeofenceResult {
   const [status, setStatus] = useState<GeofenceStatus>('idle');
-  const [geofencedEventIds, setGeofencedEventIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const [geofencedEventIds, setGeofencedEventIds] = useState<Set<string>>(new Set());
   const [nearbyEventId, setNearbyEventId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -204,14 +194,8 @@ export function useGeofence({
     // Server sync — fire-and-forget; best effort.
     if (pushToken && authToken) {
       for (const t of current) {
-        registerGeofenceOnServer(
-          t.eventId,
-          pushToken,
-          t.venueLat,
-          t.venueLng,
-          authToken,
-        ).catch((e) =>
-          console.warn(`[useGeofence] Server sync failed (${t.eventId}):`, e),
+        registerGeofenceOnServer(t.eventId, pushToken, t.venueLat, t.venueLng, authToken).catch(
+          (e) => console.warn(`[useGeofence] Server sync failed (${t.eventId}):`, e)
         );
       }
     }
@@ -232,19 +216,14 @@ export function useGeofence({
 
       // Subscribe to OS geofence-enter events.
       unsubscribeRef.current?.();
-      unsubscribeRef.current = locationService.onGeofenceEnter(
-        async (eventId) => {
-          const ticket = ticketsRef.current.find((t) => t.eventId === eventId);
-          if (!ticket) return;
-          setNearbyEventId(eventId);
-          await scheduleProximityNotification(
-            eventId,
-            ticket.eventTitle,
-          ).catch((e) =>
-            console.warn('[useGeofence] Notification failed:', e),
-          );
-        },
-      );
+      unsubscribeRef.current = locationService.onGeofenceEnter(async (eventId) => {
+        const ticket = ticketsRef.current.find((t) => t.eventId === eventId);
+        if (!ticket) return;
+        setNearbyEventId(eventId);
+        await scheduleProximityNotification(eventId, ticket.eventTitle).catch((e) =>
+          console.warn('[useGeofence] Notification failed:', e)
+        );
+      });
 
       setStatus('active');
     } catch (err: unknown) {
@@ -260,21 +239,19 @@ export function useGeofence({
   // ------------------------------------------------------------------
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const { actionIdentifier, notification } = response;
-        const data = notification.request.content.data as Record<string, unknown>;
-        const eventId = data?.eventId as string | undefined;
-        if (!eventId) return;
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const { actionIdentifier, notification } = response;
+      const data = notification.request.content.data as Record<string, unknown>;
+      const eventId = data?.eventId as string | undefined;
+      if (!eventId) return;
 
-        if (actionIdentifier === 'SHOW_TICKET') {
-          setNearbyEventId(eventId);
-        } else if (actionIdentifier === 'GATE_MAP') {
-          // Prefix signals gate-map intent to the navigation layer.
-          setNearbyEventId(`gate-map::${eventId}`);
-        }
-      },
-    );
+      if (actionIdentifier === 'SHOW_TICKET') {
+        setNearbyEventId(eventId);
+      } else if (actionIdentifier === 'GATE_MAP') {
+        // Prefix signals gate-map intent to the navigation layer.
+        setNearbyEventId(`gate-map::${eventId}`);
+      }
+    });
     return () => sub.remove();
   }, []);
 
@@ -294,9 +271,7 @@ export function useGeofence({
   // Re-register when ticket list changes after first init.
   useEffect(() => {
     if (status === 'active') {
-      registerGeofences().catch((e) =>
-        console.warn('[useGeofence] Re-registration failed:', e),
-      );
+      registerGeofences().catch((e) => console.warn('[useGeofence] Re-registration failed:', e));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tickets]);

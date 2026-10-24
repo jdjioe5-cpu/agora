@@ -7,6 +7,7 @@ Welcome to the Agora Mobile contributing guide! This guide covers everything you
 ## 1. Overview & Architecture
 
 The Agora mobile app is built with:
+
 - **Framework:** React Native with [Expo](https://expo.dev/) (managed workflow)
 - **Routing:** [Expo Router](https://docs.expo.dev/router/introduction/) (file-based routing located in `apps/mobile/app/`)
 - **Language:** TypeScript
@@ -31,6 +32,7 @@ Before getting started, make sure you have installed:
 ## 3. Installation & Setup
 
 1. **Clone the repository and install root dependencies:**
+
    ```bash
    git clone https://github.com/Agora-Events/agora.git
    cd agora
@@ -38,6 +40,7 @@ Before getting started, make sure you have installed:
    ```
 
 2. **Navigate to the mobile app workspace and install packages:**
+
    ```bash
    cd apps/mobile
    pnpm install
@@ -50,7 +53,7 @@ Before getting started, make sure you have installed:
    ```
    Set your backend API endpoint in `apps/mobile/.env`:
    ```ini
-   EXPO_PUBLIC_API_URL=http://localhost:8080
+   EXPO_PUBLIC_API_URL=http://localhost:3001
    ```
 
 ---
@@ -59,13 +62,14 @@ Before getting started, make sure you have installed:
 
 The mobile app communicates with the Agora backend server. When running locally, configure `EXPO_PUBLIC_API_URL` based on your platform:
 
-| Target Platform | `EXPO_PUBLIC_API_URL` Value | Notes |
-|---|---|---|
-| **iOS Simulator** | `http://localhost:8080` | Shares localhost directly with macOS host |
-| **Android Emulator** | `http://10.0.2.2:8080` | `10.0.2.2` maps to the host machine's loopback interface |
-| **Physical Device (Expo Go)** | `http://<YOUR_LAN_IP>:8080` (e.g. `http://192.168.1.150:8080`) | Device and development computer must be connected to the same Wi-Fi network |
+| Target Platform               | `EXPO_PUBLIC_API_URL` Value                                    | Notes                                                                       |
+| ----------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **iOS Simulator**             | `http://localhost:3001`                                        | Shares localhost directly with macOS host                                   |
+| **Android Emulator**          | `http://10.0.2.2:3001`                                         | `10.0.2.2` maps to the host machine's loopback interface                    |
+| **Physical Device (Expo Go)** | `http://<YOUR_LAN_IP>:3001` (e.g. `http://192.168.1.150:3001`) | Device and development computer must be connected to the same Wi-Fi network |
 
 To start the backend server locally (from repository root):
+
 ```bash
 cargo run --manifest-path server/Cargo.toml
 ```
@@ -82,6 +86,7 @@ pnpm start
 ```
 
 Once Metro is running, press one of the following interactive shortcuts in your terminal:
+
 - `a` — Open in connected **Android Emulator**
 - `i` — Open in **iOS Simulator**
 - `w` — Open in **Web Browser**
@@ -97,20 +102,25 @@ To scan the QR code on a physical device, open the **Expo Go** app and scan the 
 Run all verification scripts from `apps/mobile/`:
 
 ### Run Jest Unit Tests
+
 ```bash
 pnpm test
 ```
+
 To run tests in watch mode:
+
 ```bash
 pnpm test -- --watch
 ```
 
 ### Run ESLint
+
 ```bash
 pnpm lint
 ```
 
 ### Run TypeScript Type Check
+
 ```bash
 pnpm typecheck
 ```
@@ -140,7 +150,9 @@ apps/mobile/
 ## 8. Troubleshooting Common Issues
 
 ### Metro Cache Issues
+
 If you encounter module resolution errors or stale code:
+
 ```bash
 npx expo start --clear
 # or
@@ -148,15 +160,18 @@ pnpm start -- --reset-cache
 ```
 
 ### Port Conflicts
+
 If port 8081 is already in use by another process:
+
 ```bash
 pnpm start -- --port 8082
 ```
 
 ### Network Request Failures on Physical Device
+
 1. Confirm your computer and phone are connected to the exact same Wi-Fi network.
-2. Check firewall settings to ensure incoming connections on your backend port (e.g. 8080) are permitted.
-3. Test your computer's LAN IP in your phone's browser: `http://<YOUR_IP>:8080/health`.
+2. Check firewall settings to ensure incoming connections on your backend port (e.g. 3001) are permitted.
+3. Test your computer's LAN IP in your phone's browser: `http://<YOUR_IP>:3001/health`.
 
 ---
 

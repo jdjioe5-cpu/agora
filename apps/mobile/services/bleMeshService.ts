@@ -28,7 +28,7 @@ const MAX_GOSSIP_HOPS = 6;
 /** How often we sweep for new peers and retry a server flush, in ms. */
 const GOSSIP_INTERVAL_MS = 8000;
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 const FLUSH_TIMEOUT_MS = 15_000;
 
 export type CheckInResult = 'approved' | 'denied';
@@ -59,7 +59,7 @@ export class BleMeshService {
 
   constructor(
     private readonly scannerId: string,
-    private readonly peripheral?: BlePeripheral,
+    private readonly peripheral?: BlePeripheral
   ) {}
 
   /** Starts advertising presence, scanning for peers, and periodic gossip. */
@@ -70,7 +70,7 @@ export class BleMeshService {
     await this.central.startDeviceScan(
       [MESH_SERVICE_UUID],
       { allowDuplicates: false },
-      (error, device) => this.onPeerDiscovered(error, device),
+      (error, device) => this.onPeerDiscovered(error, device)
     );
     this.scanning = true;
 
@@ -119,7 +119,7 @@ export class BleMeshService {
 
     const characteristic = await connected.readCharacteristicForService(
       MESH_SERVICE_UUID,
-      MESH_LOG_CHARACTERISTIC_UUID,
+      MESH_LOG_CHARACTERISTIC_UUID
     );
     const raw = characteristic.value
       ? Buffer.from(characteristic.value, 'base64').toString('utf8')

@@ -104,7 +104,7 @@ describe('publishListing', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe('http://localhost:8080/api/v1/marketplace/listings');
+    expect(url).toBe('http://localhost:3001/api/v1/marketplace/listings');
     expect(init.method).toBe('POST');
     expect(init.headers.Authorization).toBe(`Bearer ${mockToken}`);
     expect(JSON.parse(init.body)).toMatchObject({
@@ -140,7 +140,9 @@ describe('publishListing', () => {
 
   it('throws MarketplaceApiError on non-2xx response with status', async () => {
     useAuthStore.setState({ token: 'token', user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(400, { message: 'Invalid price' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(400, { message: 'Invalid price' })
+    );
 
     await expect(
       publishListing({
@@ -157,15 +159,18 @@ describe('publishListing', () => {
     useAuthStore.setState({ token: 'token', user: null, isAuthenticated: false });
     (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(404, { message: 'Not found' }));
 
-    const error = await expect(
-      publishListing({
+    let error: any;
+    try {
+      await publishListing({
         paymentId: basePaymentId,
         eventId: baseEventId,
         priceStroops: 250000000n,
         maxPriceStroops: 300000000n,
         royaltyBps: 250,
-      })
-    ).rejects;
+      });
+    } catch (err) {
+      error = err;
+    }
 
     expect(error).toBeInstanceOf(MarketplaceApiError);
     expect((error as MarketplaceApiError).status).toBe(404);
@@ -206,7 +211,9 @@ describe('fetchListings', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe('http://localhost:8080/api/v1/marketplace/listings?event_id=evt-1&seller_wallet=GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ&status=active&limit=10&offset=0');
+    expect(url).toBe(
+      'http://localhost:3001/api/v1/marketplace/listings?event_id=evt-1&seller_wallet=GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ&status=active&limit=10&offset=0'
+    );
     expect(init.method).toBe('GET');
     expect(init.headers.Authorization).toBe(`Bearer ${mockToken}`);
     expect(result).toEqual(mockResponse);
@@ -219,12 +226,14 @@ describe('fetchListings', () => {
     await fetchListings({});
 
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe('http://localhost:8080/api/v1/marketplace/listings');
+    expect(url).toBe('http://localhost:3001/api/v1/marketplace/listings');
   });
 
   it('throws MarketplaceApiError on error response', async () => {
     useAuthStore.setState({ token: 'token', user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(500, { message: 'Server error' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(500, { message: 'Server error' })
+    );
 
     await expect(fetchListings({})).rejects.toThrow('Server error');
   });
@@ -245,12 +254,14 @@ describe('fetchListing', () => {
     await fetchListing('pay-evt 1');
 
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe('http://localhost:8080/api/v1/marketplace/listings/pay-evt%201');
+    expect(url).toBe('http://localhost:3001/api/v1/marketplace/listings/pay-evt%201');
   });
 
   it('throws MarketplaceApiError when listing not found', async () => {
     useAuthStore.setState({ token: null, user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(404, { message: 'Listing not found' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(404, { message: 'Listing not found' })
+    );
 
     await expect(fetchListing(basePaymentId)).rejects.toThrow('Listing not found');
   });
@@ -268,7 +279,7 @@ describe('withdrawListing', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/marketplace/listings/${basePaymentId}`);
+    expect(url).toBe(`http://localhost:3001/api/v1/marketplace/listings/${basePaymentId}`);
     expect(init.method).toBe('DELETE');
     expect(init.headers.Authorization).toBe(`Bearer ${mockToken}`);
     expect(result).toBe(mockResponse);
@@ -276,7 +287,9 @@ describe('withdrawListing', () => {
 
   it('throws MarketplaceApiError on withdrawal failure', async () => {
     useAuthStore.setState({ token: 'token', user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(403, { message: 'Not authorized' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(403, { message: 'Not authorized' })
+    );
 
     await expect(withdrawListing(basePaymentId)).rejects.toThrow('Not authorized');
   });
@@ -299,15 +312,11 @@ describe('submitOffer', () => {
 
     (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(200, mockResponse));
 
-    const result = await submitOffer(
-      basePaymentId,
-      'pub-base64-key',
-      240000000n
-    );
+    const result = await submitOffer(basePaymentId, 'pub-base64-key', 240000000n);
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/marketplace/listings/${basePaymentId}/offers`);
+    expect(url).toBe(`http://localhost:3001/api/v1/marketplace/listings/${basePaymentId}/offers`);
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body)).toMatchObject({
       buyer_public_key: 'pub-base64-key',
@@ -318,9 +327,13 @@ describe('submitOffer', () => {
 
   it('throws MarketplaceApiError when offer submission fails', async () => {
     useAuthStore.setState({ token: 'token', user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(400, { message: 'Invalid price' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(400, { message: 'Invalid price' })
+    );
 
-    await expect(submitOffer(basePaymentId, 'pub-key', 240000000n)).rejects.toThrow('Invalid price');
+    await expect(submitOffer(basePaymentId, 'pub-key', 240000000n)).rejects.toThrow(
+      'Invalid price'
+    );
   });
 });
 
@@ -345,7 +358,7 @@ describe('fetchOffers', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/marketplace/listings/${basePaymentId}/offers`);
+    expect(url).toBe(`http://localhost:3001/api/v1/marketplace/listings/${basePaymentId}/offers`);
     expect(result).toEqual(mockResponse);
   });
 });
@@ -377,7 +390,9 @@ describe('uploadKeyEnvelope', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/marketplace/listings/${basePaymentId}/key-envelope`);
+    expect(url).toBe(
+      `http://localhost:3001/api/v1/marketplace/listings/${basePaymentId}/key-envelope`
+    );
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body)).toMatchObject({
       buyer_wallet: baseBuyerWallet,
@@ -436,13 +451,17 @@ describe('fetchKeyEnvelope', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe(`http://localhost:8080/api/v1/marketplace/listings/${basePaymentId}/key-envelope`);
+    expect(url).toBe(
+      `http://localhost:3001/api/v1/marketplace/listings/${basePaymentId}/key-envelope`
+    );
     expect(result).toEqual(mockResponse);
   });
 
   it('returns null on 404 instead of throwing', async () => {
     useAuthStore.setState({ token: null, user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(404, { message: 'No envelope yet' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(404, { message: 'No envelope yet' })
+    );
 
     const result = await fetchKeyEnvelope(basePaymentId);
 
@@ -451,7 +470,9 @@ describe('fetchKeyEnvelope', () => {
 
   it('throws on other errors (not 404)', async () => {
     useAuthStore.setState({ token: null, user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(500, { message: 'Server error' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(500, { message: 'Server error' })
+    );
 
     await expect(fetchKeyEnvelope(basePaymentId)).rejects.toThrow('Server error');
   });
@@ -491,7 +512,7 @@ describe('registerPushToken', () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(1);
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
-    expect(url).toBe('http://localhost:8080/api/v1/marketplace/push-token');
+    expect(url).toBe('http://localhost:3001/api/v1/marketplace/push-token');
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body)).toMatchObject({
       token: 'device-token-123',
@@ -502,8 +523,12 @@ describe('registerPushToken', () => {
 
   it('throws MarketplaceApiError on registration failure', async () => {
     useAuthStore.setState({ token: 'token', user: null, isAuthenticated: false });
-    (global.fetch as jest.Mock).mockResolvedValueOnce(jsonResponse(400, { message: 'Invalid platform' }));
+    (global.fetch as jest.Mock).mockResolvedValueOnce(
+      jsonResponse(400, { message: 'Invalid platform' })
+    );
 
-    await expect(registerPushToken('token', 'invalid-platform' as any)).rejects.toThrow('Invalid platform');
+    await expect(registerPushToken('token', 'invalid-platform' as any)).rejects.toThrow(
+      'Invalid platform'
+    );
   });
 });
